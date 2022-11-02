@@ -28,7 +28,7 @@ Plug 'nvim-telescope/telescope.nvim', {'tag': '0.1.0'}
 call plug#end()
 
 
-to the ~/.vimrc file does put the file being edited
+
 " general
 set nocompatible
 set updatetime=300
