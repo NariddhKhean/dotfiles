@@ -1,90 +1,127 @@
 call plug#begin()
 
-" aesthetics
+" a e s t h e t i c s
 Plug 'shaunsingh/nord.nvim'
-Plug 'ryanoasis/vim-devicons'
-Plug 'nvim-lualine/lualine.nvim'
 Plug 'kyazdani42/nvim-web-devicons'
+Plug 'nvim-lualine/lualine.nvim'
+Plug 'nvim-treesitter/nvim-treesitter'
 
-" helpers
+" utils
 Plug 'nvim-lua/plenary.nvim'
-Plug 'nvim-treesitter/nvim-treesitter', { 'do': ':TSUpdate' }
 
 " git
 Plug 'lewis6991/gitsigns.nvim'
 
+" lsp
+Plug 'neovim/nvim-lspconfig'
+Plug 'neoclide/coc.nvim', { 'branch': 'release' }
+Plug 'pappasam/coc-jedi', { 'do': 'yarn install --frozen-lockfile && yarn build', 'branch': 'main' }
+
+" helpers
+Plug 'machakann/vim-sandwich'
+Plug 'tpope/vim-commentary'
+
 " fuzzy finder
 Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'make' }
-Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.0' }
+Plug 'nvim-telescope/telescope.nvim', {'tag': '0.1.0'}
 
-" motions
-Plug 'machakann/vim-sandwich'
-
-" lsp
-Plug 'neoclide/coc.nvim', { 'branch': 'release' }
 call plug#end()
 
 
-
+to the ~/.vimrc file does put the file being edited
 " general
-autocmd!
 set nocompatible
-scriptencoding utf-8
+set updatetime=300
 if !1 | finish | endif
+
+" encoding
+set encoding=utf-8
+set fileencoding=utf-8
 
 " aesthetics
 set number
 set relativenumber
-syntax enable
+syntax on
 if has('termguicolors')
-    set termguicolors
+  set termguicolors
 endif
 colorscheme nord
-hi Normal guibg=NONE ctermbg=NONE
+highlight Normal guibg=NONE
 lua<<END
-require'nvim-web-devicons'.setup {
- color_icons=false;
+require'nvim-web-devicons'.setup{color_icons=false}
+require'nvim-treesitter.configs'.setup{
+  ensure_installed = { "python" },
+  highlight = {
+    enable = true,
+  }
 }
 END
 
-" status line
-set showcmd
+" command line
+set cmdheight=1
+set noshowmode
+
+" status/win/tab line
+function Empty()
+  return ""
+endfunction
 set laststatus=3
-set showtabline=0
+set statusline=%{%Empty()%}
+highlight StatusLine guibg=NONE
 lua<<END
-require'lualine'.setup {
+require'lualine'.setup{
   options = {
     icons_enabled = true,
     theme = 'nord',
     component_separators = { left = '', right = ''},
-    section_separators = { left = '▓▒░', right = '░▒▓'}
+    section_separators = { left = '▓▒░ ', right = '░▒▓'},
+    disabled_filetypes = {'term'},
+    refresh = {
+      statusline = 400,
+      tabline = 400,
+      winbar = 400,
+    },
   },
-  sections = {
+  tabline = {
     lualine_a = {'mode'},
-    lualine_b = {'branch', 'diff'},
-    lualine_c = {{'filename', path=1}},
+    lualine_b = {
+      {'filetype', colored=false, icon_only=true},
+      {'filename', path=1, shorting_target=0, symbols={modified='+ ',readonly= '- ',unnamed='',newfile=''}},
+      {'%l,%c,%p'},
+    },
+    lualine_c = {},
     lualine_x = {},
-    lualine_y = {'location'},
-    lualine_z = {{'filetype', colored=false, icon_only=true}}
+    lualine_y = {
+      {'diff', colored=false},
+      'branch',
+    },
+    lualine_z = {},
   },
-  tabline = {}
+  sections = {},
+  inactive_sections = {},
+  winbar = {},
+  inactive_winbar = {},
 }
+require'lualine'.hide({place = {'statusline', 'winbar'}, unhide = false})
 END
+function RefreshLuaLine(timerID)
+  silent redrawtabline
+endfunction
+call timer_start(1000, 'RefreshLuaLine', {'repeat': -1})
 
-" whitespace
-set listchars=tab:>·,trail:~,extends:>,precedes:<
-set list
+" highlight overlength lines and extra whitespace
+highlight OverLength guifg=#D8DEE9 guibg=#3B4252
+augroup python_col_hl
+  autocmd!
+  autocmd BufRead *.py match OverLength /\%80v.*/
+augroup END
 
 " split preferences
 set splitbelow
 set splitright
 
-" over length (python)
-autocmd BufEnter,WinEnter *.py highlight OverLength guifg=#D8DEE9 guibg=#BF616A
-autocmd BufEnter,WinEnter *.py match OverLength /\%80v.*/
-
 " window
-set scrolloff=10
+set scrolloff=5
 set nowrap
 
 " tabs
@@ -109,11 +146,15 @@ set noswapfile
 set nobackup
 
 " terminal
-set shell=fish
-autocmd TermOpen * setlocal nonumber norelativenumber
-autocmd TermOpen * startinsert
-command! -nargs=* T split | res 10 | terminal
-command! -nargs=* VT vsplit | terminal
+set shell=/usr/bin/fish
+augroup term_settings
+  autocmd!
+  autocmd TermOpen * setlocal nonu nornu scl=no | startinsert
+augroup END
+nnoremap T <cmd>split<cr><c-w><s-j><cmd>res 10<cr><cmd>terminal<cr>
+tnoremap <Esc> <C-\><C-n>
+nnoremap tr :res10<cr>
+nnoremap ty :res40<cr>
 
 " git
 set signcolumn=yes:1
@@ -136,12 +177,10 @@ require'gitsigns'.setup {
     virt_text = true,
     virt_text_pos = 'eol',
     delay = 100,
-    ignore_whitespace = false,
-  },
-  current_line_blame_formatter = '<author>',
-  preview_config = {
-    border='none',
-  }
+    ignore_whitespace = true,
+  },to the ~/.vimrc file does put the file being edited
+  current_line_blame_formatter = '   (<author>)',
+  preview_config = {border='none'},
 }
 END
 nnoremap <leader>hp <cmd>Gitsigns preview_hunk<cr>
@@ -155,19 +194,30 @@ nnoremap <leader>fg <cmd>Telescope live_grep<cr>
 nnoremap <leader>fb <cmd>Telescope buffers<cr>
 
 " lsp
+set nobackup
+set nowritebackup
+set signcolumn=yes:1
 inoremap <silent><expr> <TAB> coc#pum#visible() ? coc#pum#next(1) : CheckBackspace() ? "\<Tab>" : coc#refresh()
 inoremap <expr><S-TAB> coc#pum#visible() ? coc#pum#prev(1) : "\<C-h>"
-inoremap <silent><expr> <cr> coc#pum#visible() ? coc#pum#confirm(): "\<C-g>u\<cr>\<c-r>=coc#on_enter()\<cr>"
+inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm(): "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
 function! CheckBackspace() abort
   let col = col('.') - 1
   return !col || getline('.')[col - 1]  =~# '\s'
 endfunction
+if has('nvim')
+  inoremap <silent><expr> <c-space> coc#refresh()
+else
+  inoremap <silent><expr> <c-@> coc#refresh()
+endif
+nmap <silent> [g <Plug>(coc-diagnostic-prev)
+nmap <silent> ]g <Plug>(coc-diagnostic-next)
 nmap <silent> gd <Plug>(coc-definition)
+nmap <silent> gy <Plug>(coc-type-definition)
+nmap <silent> gi <Plug>(coc-implementation)
 nmap <silent> gr <Plug>(coc-references)
-command! -nargs=0 Format :call CocActionAsync('format')
 
 " remaps: split line (opposite of <s-j>)
-nnoremap <s-k> i<cr><Esc>l
+nnoremap <s-k> i<CR><Esc>l
 
 " remaps: cycle through buffers
 nmap gn :bn<cr>
@@ -178,3 +228,7 @@ nnoremap n nzz
 nnoremap N Nzz
 nnoremap * *zz
 nnoremap # #zz
+
+" whitespace
+set listchars=tab:│\ ,leadmultispace:│\ \ \ ,trail:~,extends:⟩,precedes:⟨
+set list
