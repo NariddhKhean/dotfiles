@@ -178,7 +178,7 @@ require'gitsigns'.setup {
     virt_text_pos = 'eol',
     delay = 100,
     ignore_whitespace = true,
-  },to the ~/.vimrc file does put the file being edited
+  },
   current_line_blame_formatter = '   (<author>)',
   preview_config = {border='none'},
 }
