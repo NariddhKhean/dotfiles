@@ -1,7 +1,7 @@
 call plug#begin()
 
 " a e s t h e t i c s
-Plug 'shaunsingh/nord.nvim'
+Plug 'nariddhkhean/nord.nvim'
 Plug 'kyazdani42/nvim-web-devicons'
 Plug 'nvim-lualine/lualine.nvim'
 Plug 'nvim-treesitter/nvim-treesitter'
@@ -16,6 +16,10 @@ Plug 'lewis6991/gitsigns.nvim'
 Plug 'neovim/nvim-lspconfig'
 Plug 'neoclide/coc.nvim', { 'branch': 'release' }
 Plug 'pappasam/coc-jedi', { 'do': 'yarn install --frozen-lockfile && yarn build', 'branch': 'main' }
+
+" linters and fixers
+Plug 'dense-analysis/ale'
+Plug 'psf/black', { 'branch': 'stable' }
 
 " helpers
 Plug 'machakann/vim-sandwich'
@@ -86,15 +90,11 @@ require'lualine'.setup{
     lualine_a = {'mode'},
     lualine_b = {
       {'filetype', colored=false, icon_only=true},
-      {'filename', path=1, shorting_target=0, symbols={modified='+ ',readonly= '- ',unnamed='',newfile=''}},
-      {'%l,%c,%p'},
+      {'filename', path=2, shorting_target=0, symbols={modified='+ ',readonly= '- ',unnamed='',newfile=''}},
     },
     lualine_c = {},
     lualine_x = {},
-    lualine_y = {
-      {'diff', colored=false},
-      'branch',
-    },
+    lualine_y = {{'%l,%c [%p]'}},
     lualine_z = {},
   },
   sections = {},
@@ -107,13 +107,13 @@ END
 function RefreshLuaLine(timerID)
   silent redrawtabline
 endfunction
-call timer_start(1000, 'RefreshLuaLine', {'repeat': -1})
+call timer_start(250, 'RefreshLuaLine', {'repeat': -1})
 
 " highlight overlength lines and extra whitespace
 highlight OverLength guifg=#D8DEE9 guibg=#3B4252
 augroup python_col_hl
   autocmd!
-  autocmd BufRead *.py match OverLength /\%80v.*/
+  autocmd BufRead *.py match OverLength /\%89v.*/
 augroup END
 
 " split preferences
@@ -151,17 +151,14 @@ augroup term_settings
   autocmd!
   autocmd TermOpen * setlocal nonu nornu scl=no | startinsert
 augroup END
-nnoremap T <cmd>split<cr><c-w><s-j><cmd>res 10<cr><cmd>terminal<cr>
+nnoremap T <cmd>split<cr><c-w><s-j><cmd>res 11<cr><cmd>terminal<cr>
 tnoremap <Esc> <C-\><C-n>
-nnoremap tr :res10<cr>
+nnoremap tr :res11<cr>
 nnoremap ty :res40<cr>
 
 " git
 set signcolumn=yes:1
 highlight clear SignColumn
-highlight GitSignsAdd guifg=#8FBCBB
-highlight GitSignsChange guifg=#81A1C1
-highlight GitSignsDelete guifg=#5E81AC
 lua<<END
 require'gitsigns'.setup {
   signs = {
@@ -172,26 +169,69 @@ require'gitsigns'.setup {
     changedelete = {hl = 'GitSignsChange', text = '~', numhl='GitSignsChangeNr', linehl='GitSignsChangeLn'},
   },
   signcolumn = true,
-  current_line_blame = true,
-  current_line_blame_opts = {
-    virt_text = true,
-    virt_text_pos = 'eol',
-    delay = 100,
-    ignore_whitespace = true,
-  },
-  current_line_blame_formatter = '   (<author>)',
   preview_config = {border='none'},
 }
 END
 nnoremap <leader>hp <cmd>Gitsigns preview_hunk<cr>
+nnoremap <leader>hr <cmd>Gitsigns reset_hunk<cr>
+nnoremap <leader>hs <cmd>Gitsigns stage_hunk<cr>
 nnoremap <silent><cr> <cmd>Gitsigns next_hunk<cr>
 nnoremap <silent><bs> <cmd>Gitsigns prev_hunk<cr>
 
 " fuzzy finder
 :lua require('telescope').load_extension('fzf')
-nnoremap <leader>ff <cmd>Telescope find_files<cr>
-nnoremap <leader>fg <cmd>Telescope live_grep<cr>
-nnoremap <leader>fb <cmd>Telescope buffers<cr>
+nnoremap <leader>f <cmd>Telescope find_files<cr>
+nnoremap <leader>g <cmd>Telescope live_grep<cr>
+nnoremap <leader>d <cmd>Telescope buffers<cr>
+
+" linters and fixers
+nmap <silent> <C-k> <Plug>(ale_previous_wrap)zz
+nmap <silent> <C-j> <Plug>(ale_next_wrap)zz
+
+let g:ale_disable_lsp = 1
+
+let g:ale_set_signs = 1
+let g:ale_set_highlights = 0
+
+let g:ale_sign_error = ">>"
+highlight ALEErrorSign guifg=#BF616A gui=bold
+let g:ale_sign_warning = ">>"
+highlight ALEWarningSign guifg=#D08770 gui=bold
+let g:ale_sign_info = ">>"
+highlight ALEInfoSign guifg=#B48EAD gui=bold
+
+let g:ale_echo_cursor = 1
+let g:ale_cursor_detail = 1
+let g:ale_floating_preview = 1
+let g:ale_close_preview_on_insert = 1
+
+let g:ale_linters_explicit = 1
+let g:ale_linters = {
+\   'python': ['pylint', 'flake8'],
+\ }
+let g:ale_python_pylint_options = '--rcfile ~/.config/ims-config/pylintrc'
+let g:ale_python_flake8_options = '--config ~/.config/ims-config/flake8'
+let g:ale_fixers = {
+\   '*': ['remove_trailing_lines', 'trim_whitespace'],
+\   'python': ['isort', 'black'],
+\ }
+let g:ale_python_isort_options = '--settings ~/.config/ims-config/.isort.cfg'
+let g:ale_python_black_options = '--preview'
+
+let g:ale_lint_on_text_changed = "normal"
+let g:ale_lint_on_insert_leave = 1
+let g:ale_lint_on_enter = 1
+let g:ale_lint_on_save = 1
+let g:ale_lint_on_filetype_changed = 1
+
+let g:ale_echo_msg_format = ""
+let g:ale_floating_window_border = []
+let g:ale_floating_preview_popup_opts = {
+\    'border': ["", "", "", " ", "", "", "", " "],
+\ }
+
+let g:ale_fix_on_save = 1
+
 
 " lsp
 set nobackup
@@ -213,8 +253,16 @@ nmap <silent> [g <Plug>(coc-diagnostic-prev)
 nmap <silent> ]g <Plug>(coc-diagnostic-next)
 nmap <silent> gd <Plug>(coc-definition)
 nmap <silent> gy <Plug>(coc-type-definition)
-nmap <silent> gi <Plug>(coc-implementation)
 nmap <silent> gr <Plug>(coc-references)
+nnoremap <leader>a :call ShowDocumentation()<CR>
+function! ShowDocumentation()
+  if CocAction('hasProvider', 'hover')
+    call CocActionAsync('doHover')
+  else
+    call feedkeys('K', 'in')
+  endif
+endfunction
+nmap <leader>rn <Plug>(coc-rename)
 
 " remaps: split line (opposite of <s-j>)
 nnoremap <s-k> i<CR><Esc>l
