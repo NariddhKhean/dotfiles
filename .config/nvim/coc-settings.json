@@ -1,0 +1,11 @@
+{
+    "diagnostic.displayByAle": true,
+
+    "diagnostic.checkCurrentLine": true,
+
+    "jedi.enable": true,
+    "jedi.startupMessage": false,
+    "jedi.jediSettings.caseInsensitiveCompletion": true,
+    "jedi.markupKindPreferred": "markdown",
+    "jedi.diagnostics.enable": true
+}
