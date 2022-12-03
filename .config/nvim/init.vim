@@ -263,7 +263,7 @@ nnoremap N Nzz
 nnoremap * *zz
 nnoremap # #zz
 
-" special chats
+" special chars
 set fillchars=eob:\ ,horiz:\ ,horizup:\ ,horizdown:\ ,vert:\ ,vertleft:\ ,vertright:\ ,verthoriz:\ ,
 set listchars=tab:│\ ,leadmultispace:│\ \ \ ,trail:~,extends:⟩,precedes:⟨
 set list
