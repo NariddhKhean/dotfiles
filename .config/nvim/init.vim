@@ -46,18 +46,14 @@ set fileencoding=utf-8
 set number
 set relativenumber
 syntax on
-if has('termguicolors')
-  set termguicolors
-endif
+set termguicolors
 colorscheme nord
 highlight Normal guibg=NONE
 lua<<END
 require'nvim-web-devicons'.setup{color_icons=false}
 require'nvim-treesitter.configs'.setup{
   ensure_installed = { "python" },
-  highlight = {
-    enable = true,
-  }
+  highlight = { enable = true },
 }
 END
 
@@ -80,11 +76,6 @@ require'lualine'.setup{
     component_separators = { left = '', right = ''},
     section_separators = { left = '▓▒░ ', right = '░▒▓'},
     disabled_filetypes = {'term'},
-    refresh = {
-      statusline = 400,
-      tabline = 400,
-      winbar = 400,
-    },
   },
   tabline = {
     lualine_a = {'mode'},
@@ -272,6 +263,7 @@ nnoremap N Nzz
 nnoremap * *zz
 nnoremap # #zz
 
-" whitespace
+" special chats
+set fillchars=eob:\ ,horiz:\ ,horizup:\ ,horizdown:\ ,vert:\ ,vertleft:\ ,vertright:\ ,verthoriz:\ ,
 set listchars=tab:│\ ,leadmultispace:│\ \ \ ,trail:~,extends:⟩,precedes:⟨
 set list
