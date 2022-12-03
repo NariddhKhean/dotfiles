@@ -107,7 +107,7 @@ END
 function RefreshLuaLine(timerID)
   silent redrawtabline
 endfunction
-call timer_start(250, 'RefreshLuaLine', {'repeat': -1})
+call timer_start(300, 'RefreshLuaLine', {'repeat': -1})
 
 " highlight overlength lines and extra whitespace
 highlight OverLength guifg=#D8DEE9 guibg=#3B4252
@@ -194,11 +194,8 @@ let g:ale_set_signs = 1
 let g:ale_set_highlights = 0
 
 let g:ale_sign_error = ">>"
-highlight ALEErrorSign guifg=#BF616A gui=bold
 let g:ale_sign_warning = ">>"
-highlight ALEWarningSign guifg=#D08770 gui=bold
 let g:ale_sign_info = ">>"
-highlight ALEInfoSign guifg=#B48EAD gui=bold
 
 let g:ale_echo_cursor = 1
 let g:ale_cursor_detail = 1
@@ -249,8 +246,6 @@ if has('nvim')
 else
   inoremap <silent><expr> <c-@> coc#refresh()
 endif
-nmap <silent> [g <Plug>(coc-diagnostic-prev)
-nmap <silent> ]g <Plug>(coc-diagnostic-next)
 nmap <silent> gd <Plug>(coc-definition)
 nmap <silent> gy <Plug>(coc-type-definition)
 nmap <silent> gr <Plug>(coc-references)
