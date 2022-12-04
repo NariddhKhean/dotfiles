@@ -263,7 +263,6 @@ nnoremap N Nzz
 nnoremap * *zz
 nnoremap # #zz
 
-" special chars
-set fillchars=eob:\ ,horiz:\ ,horizup:\ ,horizdown:\ ,vert:\ ,vertleft:\ ,vertright:\ ,verthoriz:\ ,
+" whitespace
 set listchars=tab:│\ ,leadmultispace:│\ \ \ ,trail:~,extends:⟩,precedes:⟨
 set list
