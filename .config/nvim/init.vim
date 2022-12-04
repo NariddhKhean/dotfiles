@@ -2,8 +2,8 @@ call plug#begin()
 
 " a e s t h e t i c s
 Plug 'nariddhkhean/nord.nvim'
+Plug 'nariddhkhean/lualine.nvim'
 Plug 'kyazdani42/nvim-web-devicons'
-Plug 'nvim-lualine/lualine.nvim'
 Plug 'nvim-treesitter/nvim-treesitter'
 
 " utils
