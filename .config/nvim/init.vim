@@ -264,5 +264,6 @@ nnoremap * *zz
 nnoremap # #zz
 
 " whitespace
+set fillchars=eob:\ ,
 set listchars=tab:│\ ,leadmultispace:│\ \ \ ,trail:~,extends:⟩,precedes:⟨
 set list
