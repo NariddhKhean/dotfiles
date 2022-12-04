@@ -112,7 +112,7 @@ set splitbelow
 set splitright
 
 " window
-set scrolloff=5
+set scrolloff=10
 set nowrap
 
 " tabs
