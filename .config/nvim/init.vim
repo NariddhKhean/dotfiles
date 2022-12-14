@@ -28,6 +28,7 @@ Plug 'tpope/vim-commentary'
 " fuzzy finder
 Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'make' }
 Plug 'nvim-telescope/telescope.nvim', {'tag': '0.1.0'}
+Plug 'fannheyward/telescope-coc.nvim'
 
 call plug#end()
 
@@ -81,10 +82,10 @@ require'lualine'.setup{
     lualine_a = {'mode'},
     lualine_b = {
       {'filetype', colored=false, icon_only=true},
-      {'filename', path=2, shorting_target=0, symbols={modified='+ ',readonly= '- ',unnamed='',newfile=''}},
+      {'filename', path=2, shorting_target=0, symbols={modified='+ ',readonly= '',unnamed='',newfile=''}}
     },
     lualine_c = {},
-    lualine_x = {},
+    lualine_x = {'directory'},
     lualine_y = {{'%l,%c [%p]'}},
     lualine_z = {},
   },
@@ -110,6 +111,7 @@ augroup END
 " split preferences
 set splitbelow
 set splitright
+set noequalalways
 
 " window
 set scrolloff=10
@@ -169,12 +171,6 @@ nnoremap <leader>hr <cmd>Gitsigns reset_hunk<cr>
 nnoremap <leader>hs <cmd>Gitsigns stage_hunk<cr>
 nnoremap <silent><cr> <cmd>Gitsigns next_hunk<cr>
 nnoremap <silent><bs> <cmd>Gitsigns prev_hunk<cr>
-
-" fuzzy finder
-:lua require('telescope').load_extension('fzf')
-nnoremap <leader>f <cmd>Telescope find_files<cr>
-nnoremap <leader>g <cmd>Telescope live_grep<cr>
-nnoremap <leader>d <cmd>Telescope buffers<cr>
 
 " linters and fixers
 nmap <silent> <C-k> <Plug>(ale_previous_wrap)zz
@@ -239,8 +235,6 @@ else
   inoremap <silent><expr> <c-@> coc#refresh()
 endif
 nmap <silent> gd <Plug>(coc-definition)
-nmap <silent> gy <Plug>(coc-type-definition)
-nmap <silent> gr <Plug>(coc-references)
 nnoremap <leader>a :call ShowDocumentation()<CR>
 function! ShowDocumentation()
   if CocAction('hasProvider', 'hover')
@@ -250,6 +244,24 @@ function! ShowDocumentation()
   endif
 endfunction
 nmap <leader>rn <Plug>(coc-rename)
+
+" fuzzy finder
+lua << EOF
+require("telescope").setup({
+  extensions = {
+    coc = {
+      prefer_locations = true,
+    },
+  },
+})
+require('telescope').load_extension('coc')
+require('telescope').load_extension('fzf')
+EOF
+nnoremap <leader>f <cmd>Telescope find_files<cr>
+nnoremap <leader>g <cmd>Telescope live_grep<cr>
+nnoremap <leader>d <cmd>Telescope buffers<cr>
+nnoremap <leader>s <cmd>Telescope resume<cr>
+nnoremap <silent> gr <cmd>Telescope coc references<cr>
 
 " remaps: split line (opposite of <s-j>)
 nnoremap <s-k> i<CR><Esc>l
@@ -263,6 +275,8 @@ nnoremap n nzz
 nnoremap N Nzz
 nnoremap * *zz
 nnoremap # #zz
+nnoremap [m [mzz
+nnoremap ]m ]mzz
 
 " whitespace
 set fillchars=eob:\ ,
