@@ -270,6 +270,17 @@ nnoremap <s-k> i<CR><Esc>l
 nmap gn :bn<cr>
 nmap gp :bp<cr>
 
+" remap: delete all buffers beside current
+function! CleanUp()
+  let curr_row = line('.') - 1
+  let curr_col = col('.') - 1
+  execute '%bd!'
+  execute 'e#'
+  execute 'normal '.curr_row.'j'
+  execute 'normal '.curr_col.'l'
+endfunction
+nmap <leader>q :call CleanUp()<CR>
+
 " remaps: center on some jumps
 nnoremap n nzz
 nnoremap N Nzz
