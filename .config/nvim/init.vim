@@ -26,7 +26,7 @@ Plug 'machakann/vim-sandwich'
 Plug 'tpope/vim-commentary'
 
 " fuzzy finder
-Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'make' }
+Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build' }
 Plug 'nvim-telescope/telescope.nvim', {'tag': '0.1.0'}
 Plug 'fannheyward/telescope-coc.nvim'
 
@@ -86,7 +86,7 @@ require'lualine'.setup{
     },
     lualine_c = {},
     lualine_x = {'directory'},
-    lualine_y = {{'%l,%c [%p]'}},
+    lualine_y = {{'%l,%c [%p%%]'}},
     lualine_z = {},
   },
   sections = {},
@@ -105,7 +105,7 @@ call timer_start(300, 'RefreshLuaLine', {'repeat': -1})
 highlight OverLength guifg=#D8DEE9 guibg=#3B4252
 augroup python_col_hl
   autocmd!
-  autocmd BufRead *.py match OverLength /\%89v.*/
+  autocmd BufAdd *.py match OverLength /\%89v.*/
 augroup END
 
 " split preferences
@@ -144,9 +144,9 @@ augroup term_settings
   autocmd!
   autocmd TermOpen * setlocal nonu nornu scl=no | startinsert
 augroup END
-nnoremap T <cmd>split<cr><c-w><s-j><cmd>res 11<cr><cmd>terminal<cr>
+nnoremap <s-t> <cmd>split<cr><c-w><s-j><cmd>res 13<cr><cmd>terminal<cr>
 tnoremap <Esc> <C-\><C-n>
-nnoremap tr :res11<cr>
+nnoremap tr :res13<cr>
 nnoremap ty :res40<cr>
 
 " git
@@ -185,10 +185,17 @@ let g:ale_sign_error = ">>"
 let g:ale_sign_warning = ">>"
 let g:ale_sign_info = ">>"
 
-let g:ale_echo_cursor = 1
+let g:ale_echo_delay = 0
+
+let g:ale_echo_cursor = 0
+let g:ale_virtualtext_cursor = 0
 let g:ale_cursor_detail = 1
+
+let g:ale_set_balloons = 1
 let g:ale_floating_preview = 1
 let g:ale_close_preview_on_insert = 1
+let g:ale_floating_window_border = []
+let g:ale_floating_preview_popup_opts = {'border': ["", "", "", " ", "", "", "", " "]}
 
 let g:ale_linters_explicit = 1
 let g:ale_linters = {
@@ -208,12 +215,6 @@ let g:ale_lint_on_insert_leave = 1
 let g:ale_lint_on_enter = 1
 let g:ale_lint_on_save = 1
 let g:ale_lint_on_filetype_changed = 1
-
-let g:ale_echo_msg_format = ""
-let g:ale_floating_window_border = []
-let g:ale_floating_preview_popup_opts = {
-\    'border': ["", "", "", " ", "", "", "", " "],
-\ }
 
 let g:ale_fix_on_save = 1
 
@@ -271,15 +272,39 @@ nmap gn :bn<cr>
 nmap gp :bp<cr>
 
 " remap: delete all buffers beside current
-function! CleanUp()
-  let curr_row = line('.') - 1
-  let curr_col = col('.') - 1
-  execute '%bd!'
-  execute 'e#'
-  execute 'normal '.curr_row.'j'
-  execute 'normal '.curr_col.'l'
-endfunction
-nmap <leader>q :call CleanUp()<CR>
+function! Wipeout(bang)
+  " figure out which buffers are visible in any tab
+  let visible = {}
+  for t in range(1, tabpagenr('$'))
+    for b in tabpagebuflist(t)
+      let visible[b] = 1
+    endfor
+  endfor
+  " close any buffer that are loaded and not visible
+  let l:tally = 0
+  let l:skips = 0
+  let l:cmd = 'bw'
+  if a:bang
+    let l:cmd .= '!'
+  endif
+  for b in range(1, bufnr('$'))
+    if buflisted(b) && !has_key(visible, b)
+      if getbufvar(b, "&mod")
+        let l:skips += 1
+        continue
+      endif
+      let l:tally += 1
+      exe l:cmd . ' ' . b
+    endif
+  endfor
+  let l:msg = "Deleted " . l:tally . " buffer" . (l:tally == 1 ? "" : "s")
+  if l:skips
+    let l:msg .= ", skipped " . l:skips . " modified buffer" . (l:skips == 1 ? "" : "s")
+  endif
+  echon l:msg
+endfun
+command! -bang Wipeout :call Wipeout(<bang>0)
+nmap <leader>q :Wipeout!<CR>
 
 " remaps: center on some jumps
 nnoremap n nzz
