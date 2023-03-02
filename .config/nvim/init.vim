@@ -259,8 +259,11 @@ require('telescope').load_extension('coc')
 require('telescope').load_extension('fzf')
 EOF
 nnoremap <leader>f <cmd>Telescope find_files<cr>
+vnoremap <leader>f "zy:Telescope find_files default_text=<C-r>z<cr>
 nnoremap <leader>g <cmd>Telescope live_grep<cr>
+vnoremap <leader>g "zy:Telescope live_grep default_text=<C-r>z<cr>
 nnoremap <leader>d <cmd>Telescope buffers<cr>
+vnoremap <leader>d "zy:Telescope buffers default_text=<C-r>z<cr>
 nnoremap <leader>s <cmd>Telescope resume<cr>
 nnoremap <silent> gr <cmd>Telescope coc references<cr>
 
